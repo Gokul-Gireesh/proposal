@@ -19,7 +19,9 @@ Defining a base structure to be inherited.
 // yourType.js
 type yourType: {
   id: int 4,
-  active: bit
+  active: bit,
+  clown: (),
+  bat: int 4 []
 };
 
 // Main file
@@ -31,7 +33,7 @@ type myType: {
   hen: [int 1, int 4, str], 
   cow: int [8],     
   horse: int 1 [8] [6], 
-} extends yourType; // Inherits id and active into the memory map
+} extends yourType; // Inherits id and active, etc into the memory map
 ```
 
 ### 2. Fixed-Width Primitives
@@ -46,6 +48,25 @@ let n: int 1 = 3;    // Signed 8-bit
 ```javascript
 let r: 4.4 = 7.2; // 4-bit resolution before and 4-bit after '.'
 let t: .8 = 1.3;  // 8-bit resolution after decimal, dynamic before
+let v: . = 4.3; // dynamic float, standard js optimization, but it'll never be strings!
+```
+
+### 4. Function Declarations
+```javascript
+function fn(a: int 4, b: int 4) {
+  // rest of the code
+}
+
+let myfn: () = (d: int 4) => {};
+```
+
+### 5. Using Pre-defined types
+```javascript
+let x: type myType = {
+  man: 5,
+  woman: 'eva',
+  cow: [2,3,4,0,0,0,7,8]
+}
 ```
 
 ---
@@ -61,6 +82,8 @@ To keep the memory model predictable for the engine, we follow these constraints
 4.  **Implicit Optimization:** 
     *   An empty object `{}` implies "any number of props" (standard JS).
     *   A typed object implies "blindly assume only these props exist."
+    *   An empty array also implies any number of elements
+    *   An array and function implies it doesn't have any props, unless its extends to a type object of defined size
 5.  **Overflows:** 
     *   `int` overflows wrap (e.g., 128 becomes -127 in `int 1`).
     *   `str` overflows are truncated to the fixed size.
