@@ -87,6 +87,7 @@ To keep the memory model predictable for the engine, we follow these constraints
 5.  **Overflows:** 
     *   `int` overflows wrap (e.g., 128 becomes -127 in `int 1`).
     *   `str` overflows are truncated to the fixed size.
+    *   `{prop}` hints are implicitly Memory-Locked. Assignments to undeclared properties are silently ignored to preserve the static memory offset. This ensures that property access remains a simple pointer-addition operation rather than a dynamic lookup.
 
 ---
 
@@ -106,7 +107,7 @@ By using str N, the developer guarantees that the value will never exceed N char
 
 Once a variable is declared with a hint (e.g., let score: uint 2), that hint is locked for the lifetime of that scope. The engine can generate optimized machine code for that specific memory layout immediately, knowing the developer will never 'change their mind' about the type.
 
-The hints are exclusively applied at the point of variable declaration and function argument definition. This is not a system for type safety or return-type tracking; rather, it informs the engine of the intended storage format for the variable itself. If a function returns a value, the engine optimizes based on the hinted type of the variable receiving that value, applying the promised overflow or truncation rules (e.g., int wrapping) upon assignment
+The hints are exclusively applied at the point of variable declaration and function argument definition. This is not a system for type safety or return-type tracking; rather, it informs the engine of the intended storage format for the variable itself. If a function returns a value, the engine optimizes based on the hinted type of the variable receiving that value, applying the promised overflow or truncation rules (e.g., int wrapping) upon assignment.
 
 ```JavaScript
 // Example of your "Receiver" logic:
@@ -117,6 +118,10 @@ let result: int 1 = calculate();
 // It only cares that 'result' is an 'int 1'.
 // The value 500 wraps to -12 because the 'bucket' is fixed.
 ```
+
+> hinted.js is an add-on to the language rather than a mode switch. It can be defined on some variables, all, or nothing. It should exist alongside JS, not act as a fork of JS.
+
+> hinted.js is not meant to replace Wasm or TypeScript. It ensures neither type safety nor actual bit-level allocations; instead, it allows the JS engine to evaluate and run code more efficiently and effectively. It eliminates the overhead of jumping between JS and Wasm for simple calculations, where the context-switching cost often results in diminished returns compared to native execution speeds.
 
 ## Additional Proposal: Declaration Keywords for Arguments
 To maximize the performance gains of hinted.js, this proposal suggests (and is designed to integrate with) the use of let and const keywords within function argument lists.
