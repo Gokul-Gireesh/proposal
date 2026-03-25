@@ -89,6 +89,13 @@ To keep the memory model predictable for the engine, we follow these constraints
     *   `str` overflows are truncated to the fixed size.
     *   `{prop}` hints are implicitly Memory-Locked. Assignments to undeclared properties are silently ignored to preserve the static memory offset. This ensures that property access remains a simple pointer-addition operation rather than a dynamic lookup.
 
+> ## The Case for Hardware Trapping (Performance Note)
+> While this proposal defines predictable behaviors like **wrapping** and **truncation**, for maximum performance, engines should implement **Hardware-Level Trapping**:
+> 
+> *   **Zero-Check Execution:** By allowing the engine to **Trap** (hard crash) on a type violation, we eliminate the "Safety Tax." The engine no longer writes `if (type)` checks in the machine code; it generates a single CPU instruction and trusts the hardware. 
+> *   **Wasm Parity:** WebAssembly is allowed to Trap to gain near-native speeds. JavaScript should not be "babysat" by the engine when a developer explicitly opts into a high-performance hint.
+> *   **Hardware Efficiency:** By Trapping, a "broken promise" results in an immediate hardware interrupt. This is the **fastest possible way** to handle errors, as it requires zero software logic during the "happy path" of execution.
+
 ---
 
 ## Why this is better than "Types as Comments"
