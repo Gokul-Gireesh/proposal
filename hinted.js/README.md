@@ -89,6 +89,7 @@ To keep the memory model predictable for the engine, we follow these constraints
     *   `str` overflows are truncated to the fixed size.
     *   `{prop}` hints are implicitly Memory-Locked. Assignments to undeclared properties are silently ignored to preserve the static memory offset. This ensures that property access remains a simple pointer-addition operation rather than a dynamic lookup.
 
+> [!TIP]
 > ## The Case for Hardware Trapping (Performance Note)
 > While this proposal defines predictable behaviors like **wrapping** and **truncation**, for maximum performance, engines should implement **Hardware-Level Trapping**:
 > 
@@ -96,6 +97,8 @@ To keep the memory model predictable for the engine, we follow these constraints
 > *   **Wasm Parity:** WebAssembly is allowed to Trap to gain near-native speeds. JavaScript should not be "babysat" by the engine when a developer explicitly opts into a high-performance hint.
 > *   **Hardware Efficiency:** By Trapping, a "broken promise" results in an immediate hardware interrupt. This is the **fastest possible way** to handle errors, as it requires zero software logic during the "happy path" of execution.
 
+> [!NOTE] 
+> Node.js can enable hinted execution by default across all contexts. In browsers, hinted execution can be restricted to Worker threads by default to ensure UI stability; access in the Main Thread can be permitted if the site is installed as a PWA.
 ---
 
 ## Why this is better than "Types as Comments"
